@@ -1,4 +1,7 @@
 exports.handler = async (event) => {
+  console.log("Running signup function...");
+  console.log("GITHUB_TOKEN present?", !!process.env.GITHUB_TOKEN);
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
