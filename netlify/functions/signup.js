@@ -2,6 +2,19 @@ exports.handler = async (event) => {
   console.log("Running signup function...");
   console.log("GITHUB_TOKEN present?", !!process.env.GITHUB_TOKEN);
 
+  // Handle preflight request
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      },
+      body: ''
+    };
+  }
+
   if (event.httpMethod !== 'POST') {
     console.log("Wrong method:", event.httpMethod);
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -35,14 +48,18 @@ exports.handler = async (event) => {
     console.log("GitHub response status:", response.status);
     console.log("GitHub response text:", text);
 
-    if (!response.ok) {
-      return { statusCode: 500, body: 'GitHub Issue creation failed: ' + text };
-    }
-
-    return { statusCode: 200, body: 'Signup successful' };
+    return {
+      statusCode: response.ok ? 200 : 500,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: response.ok ? 'Signup successful' : 'GitHub Issue creation failed: ' + text
+    };
 
   } catch (error) {
     console.error("Error processing signup:", error);
-    return { statusCode: 500, body: 'Internal Server Error: ' + error.message };
+    return {
+      statusCode: 500,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: 'Internal Server Error: ' + error.message
+    };
   }
 };
