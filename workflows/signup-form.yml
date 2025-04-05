@@ -1,1 +1,23 @@
+name: Handle Email Signup
 
+on:
+  repository_dispatch:
+    types: [new_signup]
+
+jobs:
+  create_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub Issue
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const email = context.payload.client_payload.email;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `New Signup: ${email}`,
+              body: `Email signup received: ${email}`,
+              labels: ['signup']
+            });
