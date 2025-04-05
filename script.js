@@ -56,3 +56,26 @@ fetch('https://raw.githubusercontent.com/mflanagan201/gcal_auto/main/ECON_CAL.CS
     document.getElementById('release-list').innerHTML = 'Failed to load data.';
     console.error('CSV fetch/parse error:', err);
   });
+
+
+// Email signup form handling
+const signupForm = document.getElementById('signup-form');
+if (signupForm) {
+  signupForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+
+    const response = await fetch('https://sprightly-sunshine-910ae5.netlify.app/.netlify/functions/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+
+    const message = document.getElementById('message');
+    if (response.ok) {
+      message.textContent = 'Thanks for signing up!';
+    } else {
+      message.textContent = 'Oops! Something went wrong.';
+    }
+  });
+}
