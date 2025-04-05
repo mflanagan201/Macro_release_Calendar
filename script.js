@@ -1,16 +1,20 @@
 function parseDate(dateStr) {
-  // Handle YYYYMMDD or YYYY-MM-DD
+  // Handles formats like "2025-04-06 08:30:00"
+  if (/^\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?$/.test(dateStr)) {
+    return new Date(dateStr.replace(' ', 'T')); // Converts to ISO format
+  }
+
+  // Handles compact format like "20250406"
   if (/^\d{8}$/.test(dateStr)) {
     return new Date(`${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`);
-  } else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-    return new Date(dateStr);
   }
+
   return null;
 }
 
 function isThisWeek(date) {
   const now = new Date();
-  const oneWeekLater = new Date(now);
+  const oneWeekLater = new Date();
   oneWeekLater.setDate(now.getDate() + 7);
   return date >= now && date <= oneWeekLater;
 }
@@ -41,7 +45,9 @@ fetch('https://raw.githubusercontent.com/mflanagan201/gcal_auto/main/ECON_CAL.CS
         `;
         list.appendChild(li);
       });
-
-
-      
-      
+    }
+  })
+  .catch(err => {
+    document.getElementById('release-list').innerHTML = 'Failed to load data.';
+    console.error('CSV fetch/parse error:', err);
+  });
