@@ -3,11 +3,19 @@ exports.handler = async (event) => {
   console.log("GITHUB_TOKEN present?", !!process.env.GITHUB_TOKEN);
 
   if (event.httpMethod !== 'POST') {
+    console.log("Wrong method:", event.httpMethod);
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
-    const { email } = JSON.parse(event.body);
+    const parsed = JSON.parse(event.body);
+    console.log("Parsed event body:", parsed);
+
+    const email = parsed.email;
+    if (!email) {
+      console.log("No email provided.");
+      return { statusCode: 400, body: 'Missing email' };
+    }
 
     const response = await fetch('https://api.github.com/repos/mflanagan201/Macro_release_Calendar/issues', {
       method: 'POST',
