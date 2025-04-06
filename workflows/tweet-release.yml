@@ -25,5 +25,5 @@ jobs:
         env:
           TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
           TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
-          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACTION_CODE }}
+          TWITTER_ACCESS_CODE: ${{ secrets.TWITTER_ACTION_CODE }}
           TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
