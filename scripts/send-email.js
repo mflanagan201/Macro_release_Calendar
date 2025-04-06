@@ -43,17 +43,22 @@ function formatEmail(releases) {
     const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
     const fullDate = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
     const title = r.SUMMARY || 'Unnamed release';
-    return `<li><strong>${weekday}:</strong> ${title}</li>`;
+    return `
+      <div style="margin-bottom: 16px;">
+        <span style="color: #4A90E2; font-weight: bold;">${weekday}, ${fullDate}:</span><br/>
+        <span style="font-size: 15px;">${title}</span>
+      </div>
+    `;
   }).join('\n');
 
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
-      <h2 style="color: #222;">Weekly Economic Calendar</h2>
-      <p style="font-style: italic; color: #444;">
-        The following indicators will be released next week.
+      <h2 style="color: #2C3E50;">Weekly Economic Calendar</h2>
+      <p style="font-style: italic; color: #555;">
+        Hi, the following indicators will be released next week:
       </p>
-      <ul style="padding-left: 1.2em;">${listItems}</ul>
-      <p style="margin-top: 30px;">— <strong>Macro Release Calendar</strong></p>
+      ${listItems}
+      <p style="margin-top: 30px; font-size: 14px; color: #888;">— Macro Release Calendar</p>
     </div>
   `;
 }
