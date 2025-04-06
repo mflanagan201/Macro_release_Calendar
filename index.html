@@ -3,17 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Macro Release Calendar</title>
+
+  <title>Macro Release Calendar – Key Global Economic Indicators</title>
+  <meta name="description" content="Track weekly economic releases from around the world. Subscribe for email alerts and view a curated calendar of macro indicators." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Macro Release Calendar" />
+  <meta property="og:description" content="Get notified about upcoming global economic indicators. See what’s coming this week!" />
+  <meta property="og:url" content="https://www.macrocalendar.com" />
+  <meta property="og:type" content="website" />
+  <!-- Optional: Add a logo image -->
+  <!-- <meta property="og:image" content="https://macrocalendar.com/logo.png" /> -->
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Macro Release Calendar" />
+  <meta name="twitter:description" content="See this week’s global economic indicators and never miss a release." />
+
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </head>
 <body>
   <header>
     <h1>Macro Release Calendar</h1>
-    <p>Upcoming global economic releases this week</p>
+    <p>Stay informed about key global economic indicators each week</p>
   </header>
+
   <main>
-    <ul id="release-list">Loading data...</ul>
+    <section id="weekly-releases">
+      <ul id="release-list">Loading data...</ul>
+    </section>
 
     <section style="margin-top: 3em;">
       <h2>Stay Informed</h2>
@@ -26,9 +45,11 @@
       <p id="message"></p>
     </section>
   </main>
-  <footer>
+
+  <footer style="margin-top: 4em;">
     <a href="calendar.html">View full calendar</a>
   </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
