@@ -34,22 +34,32 @@ async function getReleases() {
 }
 
 // 3. Format the email
-function formatEmail(releases) {
-  if (!releases.length) return 'There are no economic indicators scheduled for next week.';
 
-  const grouped = releases.map(r => {
+function formatEmail(releases) {
+  if (!releases.length) return '<p>There are no economic indicators scheduled for next week.</p>';
+
+  const listItems = releases.map(r => {
     const date = new Date(r.DTSTART.replace(' ', 'T'));
     const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
     const fullDate = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
-    return `<li><strong>${weekday}, ${fullDate}</strong> — ${r.SUMMARY || 'Unnamed release'}${r.LOCATION ? ` (${r.LOCATION})` : ''}</li>`;
+    const title = r.SUMMARY || 'Unnamed release';
+    return `<li><strong>${weekday}:</strong> ${title}</li>`;
   }).join('\n');
 
   return `
-    <p>Here are the key economic indicators scheduled for next week:</p>
-    <ul>${grouped}</ul>
-    <p>— Macro Release Calendar</p>
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
+      <h2 style="color: #222;">Weekly Economic Calendar</h2>
+      <p style="font-style: italic; color: #444;">
+        The following indicators will be released next week.
+      </p>
+      <ul style="padding-left: 1.2em;">${listItems}</ul>
+      <p style="margin-top: 30px;">— <strong>Macro Release Calendar</strong></p>
+    </div>
   `;
 }
+
+
+
 
 // 4. Send via Brevo
 async function sendEmail(toEmails, html) {
