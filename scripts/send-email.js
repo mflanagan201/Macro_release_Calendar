@@ -54,12 +54,11 @@ function formatEmail(releases) {
 // 4. Send via Brevo
 async function sendEmail(toEmails, html) {
   const body = {
-    sender: { name: "Macro Calendar", email: "noreply@macrocalendar.com" },
-    to: toEmails.map(email => ({ email })),
-    subject: "Upcoming Economic Releases – Weekly Summary",
-    htmlContent: html
-  };
-
+  sender: { name: "Macro Calendar", email: "noreply@macrocalendar.com" },  // Make sure this is verified in Brevo
+  to: [{ email: TO_EMAIL }],
+  subject: "Test Email from Macro Release Calendar",
+  htmlContent: html
+};
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
