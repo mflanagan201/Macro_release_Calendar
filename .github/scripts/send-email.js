@@ -3,17 +3,29 @@ const Papa = require('papaparse');
 
 // 1. Fetch email signups from GitHub Issues
 async function getEmails() {
-  const issues = await fetch('https://api.github.com/repos/mflanagan201/Macro_release_Calendar/issues?labels=signup', {
+  const res = await fetch('https://api.github.com/repos/mflanagan201/Macro_release_Calendar/issues?labels=signup', {
     headers: {
-      'Accept': 'application/vnd.github.v3+json',
-      'Authorization': `Bearer ${process.env.GITHUB_TOKEN || ''}` // optional if public repo
+      'Accept': 'application/vnd.github.v3+json'
     }
-  }).then(res => res.json());
+  });
 
-  return issues.map(issue => {
-    const match = issue.title.match(/New Signup:\s*(.*)/);
-    return match ? match[1].trim() : null;
-  }).filter(Boolean);
+  const contentType = res.headers.get('content-type');
+  if (!res.ok || !contentType.includes('application/json')) {
+    const errorText = await res.text();
+    throw new Error(`GitHub Issues API error: ${errorText}`);
+  }
+
+  const issues = await res.json();
+  if (!Array.isArray(issues)) {
+    throw new Error(`Unexpected GitHub response format: ${JSON.stringify(issues)}`);
+  }
+
+  return issues
+    .map(issue => {
+      const match = issue.title.match(/New Signup:\s*(.*)/);
+      return match ? match[1].trim() : null;
+    })
+    .filter(Boolean);
 }
 
 // 2. Fetch and parse releases from CSV
@@ -35,9 +47,9 @@ async function getReleases() {
 
 // 3. Format the email
 function formatEmail(releases) {
-  if (!releases.length) return 'There are no economic indicators scheduled for next week.';
+  if (!releases.length) return '<p>There are no economic indicators scheduled for next week.</p>';
 
-  const grouped = releases.map(r => {
+  const listItems = releases.map(r => {
     const date = new Date(r.DTSTART.replace(' ', 'T'));
     const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
     const fullDate = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
@@ -46,7 +58,7 @@ function formatEmail(releases) {
 
   return `
     <p>Here are the key economic indicators scheduled for next week:</p>
-    <ul>${grouped}</ul>
+    <ul>${listItems}</ul>
     <p>— Macro Release Calendar</p>
   `;
 }
@@ -69,9 +81,9 @@ async function sendEmail(toEmails, html) {
     body: JSON.stringify(body)
   });
 
+  const text = await res.text();
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Failed to send email: ${errText}`);
+    throw new Error(`Failed to send email: ${text}`);
   }
 
   console.log("Email sent to:", toEmails.join(', '));
