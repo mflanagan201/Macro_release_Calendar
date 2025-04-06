@@ -39,17 +39,17 @@ function formatEmail(releases) {
   if (!releases.length) return '<p>There are no economic indicators scheduled for next week.</p>';
 
   const listItems = releases.map(r => {
-    const date = new Date(r.DTSTART.replace(' ', 'T'));
-    const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
-    const fullDate = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
-    const title = r.SUMMARY || 'Unnamed release';
-    return `
-      <div style="margin-bottom: 16px;">
-        <span style="color: #4A90E2; font-weight: bold;">${weekday}, ${fullDate}:</span><br/>
-        <span style="font-size: 15px;">${title}</span>
-      </div>
-    `;
-  }).join('\n');
+  const date = new Date(r.DTSTART.replace(' ', 'T'));
+  const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
+  const fullDate = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
+  const title = r.SUMMARY || 'Unnamed release';
+  return `
+    <div style="margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid #ddd;">
+      <span style="color: #4A90E2; font-weight: bold;">${weekday}, ${fullDate}:</span><br/>
+      <span style="font-size: 15px;">${title}</span>
+    </div>
+  `;
+}).join('\n');
 
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
