@@ -35,9 +35,12 @@ async function getReleases() {
 
 // 3. Format the email
 
-
 function formatEmail(releases) {
-  if (!releases.length) return '<p>There are no economic indicators scheduled for next week.</p>';
+  if (!releases.length) {
+    return '<p>There are no economic indicators scheduled for next week.</p>';
+  }
+
+  const spacerImageUrl = 'https://your-server.com/path-to-transparent.gif'; // Replace with your image URL
 
   const listItems = releases.map(r => {
     const date = new Date(r.DTSTART.replace(' ', 'T'));
@@ -47,7 +50,10 @@ function formatEmail(releases) {
 
     return `
       <div>
-        <strong>${weekday}, ${fullDate}</strong> — ${title}<br><br><br>
+        <strong>${weekday}, ${fullDate}</strong> — ${title}
+      </div>
+      <div>
+        <img src="${spacerImageUrl}" alt="" style="display:block; width:1px; height:20px; line-height:20px; font-size:0px;">
       </div>
     `;
   }).join('');
@@ -65,6 +71,7 @@ function formatEmail(releases) {
     </div>
   `;
 }
+
 
 
 // 4. Send via Brevo
