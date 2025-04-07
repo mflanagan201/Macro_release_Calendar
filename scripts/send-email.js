@@ -49,7 +49,7 @@ function formatEmail(releases) {
       <span style="font-size: 15px;">${title}</span>
     </div>
   `;
-}).join('\n');
+}).join('<br/><br/>');
 
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
