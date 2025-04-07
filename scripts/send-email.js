@@ -58,7 +58,11 @@ function formatEmail(releases) {
       <p style="font-style: italic; color: #555;">
         Hi, the following indicators will be released next week:
       </p>
-      ${items}
+      ${items} <br/><br/>
+<br/><br/>
+<br/><br/>
+<br/><br/>
+
       <p style="margin-top: 30px; font-size: 14px; color: #888;">— Macro Release Calendar</p>
     </div>
   `;
