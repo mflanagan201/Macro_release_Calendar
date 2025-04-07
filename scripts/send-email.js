@@ -39,18 +39,14 @@ async function getReleases() {
 function formatEmail(releases) {
   if (!releases.length) return '<p>There are no economic indicators scheduled for next week.</p>';
 
-  const items = releases.map(r => {
+  const releaseChunks = releases.map(r => {
     const date = new Date(r.DTSTART.replace(' ', 'T'));
     const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
     const fullDate = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
     const title = r.SUMMARY || 'Unnamed release';
 
-    return `
-      <div style="margin-bottom: 20px; line-height: 1.5;">
-        <span style="font-weight: bold;">${weekday}, ${fullDate}</span> — ${title}
-      </div>
-    `;
-  }).join('');
+    return `<strong>${weekday}, ${fullDate}</strong> — ${title}`;
+  }).join('<br><br><br>'); // TRIPLE line break, like your RMarkdown
 
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
@@ -58,11 +54,9 @@ function formatEmail(releases) {
       <p style="font-style: italic; color: #555;">
         Hi, the following indicators will be released next week:
       </p>
-      ${items} <br/><br/>
-<br/><br/>
-<br/><br/>
-<br/><br/>
-
+      <div style="font-size: 15px;">
+        ${releaseChunks}
+      </div>
       <p style="margin-top: 30px; font-size: 14px; color: #888;">— Macro Release Calendar</p>
     </div>
   `;
