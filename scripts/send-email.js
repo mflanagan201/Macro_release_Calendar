@@ -35,6 +35,7 @@ async function getReleases() {
 
 // 3. Format the email
 
+
 function formatEmail(releases) {
   if (!releases.length) return '<p>There are no economic indicators scheduled for next week.</p>';
 
@@ -46,10 +47,11 @@ function formatEmail(releases) {
 
     return `
       <tr>
-        <td style="padding: 10px 0;">
+        <td style="padding: 10px 0; font-size: 15px;">
           <strong>${weekday}, ${fullDate}</strong> — ${title}
         </td>
       </tr>
+      <tr><td style="height: 15px;"></td></tr> <!-- this forces space -->
     `;
   }).join('');
 
@@ -59,14 +61,13 @@ function formatEmail(releases) {
       <p style="font-style: italic; color: #555;">
         Hi, the following indicators will be released next week:
       </p>
-      <table style="width: 100%; border-collapse: collapse;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
         ${rows}
       </table>
       <p style="margin-top: 30px; font-size: 14px; color: #888;">— Macro Release Calendar</p>
     </div>
   `;
 }
-
 
 
 
