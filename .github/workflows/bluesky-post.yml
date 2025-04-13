@@ -1,0 +1,28 @@
+name: Weekly Bluesky Post
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9 AM UTC
+  workflow_dispatch:     # Allows you to trigger the workflow manually
+
+jobs:
+  post-to-bluesky:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Post to Bluesky
+        run: node scripts/postToBluesky.js
+        env:
+          BLUESKY_USER: ${{ secrets.BLUESKY_USER }}
+          BLUESKY_PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
