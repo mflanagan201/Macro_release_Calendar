@@ -9,7 +9,7 @@ const agent = new BskyAgent({ service: 'https://bsky.social' });
   try {
     await agent.login({
       identifier: process.env.BLUESKY_USER,
-      password: process.env.BLUESKY_PASSWORD
+      password: process.env.BLUESKY_PASSWORD,
     });
 
     const csvUrl = 'https://raw.githubusercontent.com/mflanagan201/gcal_auto/main/ECON_CAL.CSV';
@@ -43,11 +43,12 @@ const agent = new BskyAgent({ service: 'https://bsky.social' });
 
     let body = "This Week's Irish Economic Releases:\n\n";
     for (const line of lines) {
-      if ((body + line + '\n\n').length > 280) break;
-      body += line + '\n\n';
+      const nextLine = line + '\n\n';
+      if ((body + nextLine + 'More: https://www.macrocalendar.com\n\n#Irisheconomy #ireland #economy #centralbank').length > 300) break;
+      body += nextLine;
     }
 
-    body += 'https://www.macrocalendar.com\n';
+    body += 'More: https://www.macrocalendar.com\n\n';
     body += '#Irisheconomy #ireland #economy #centralbank';
 
     await agent.post({ text: body });
