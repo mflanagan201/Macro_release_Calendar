@@ -40,17 +40,17 @@ const client = new TwitterApi({
       return `• ${day}: ${r.SUMMARY}`;
     });
 
-    let tweet = "This Week's Irish Economic Releases:\n";
+    let body = "This Week's Irish Economic Releases:\n";
     for (const line of lines) {
-      if ((tweet + line + '\n\nMore at macrocalendar.com').length > 280) break;
-      tweet += line + '\n';
+      if ((body + line + '\n\nMore at macrocalendar.com').length > 280) break;
+      body += line + '\n';
     }
-    tweet += '\nMore at macrocalendar.com';
+    body += '\nMore at macrocalendar.com';
 
-    await client.v2.tweet(tweet);
-    console.log('Tweet sent successfully!');
+    const response = await client.v2.tweet(body);
+    console.log('Tweet sent successfully!', response);
   } catch (err) {
-    console.error('Tweet failed:', err.message);
+    console.error('Tweet failed:', err.response?.data || err.message || err);
     process.exit(1);
   }
 })();
