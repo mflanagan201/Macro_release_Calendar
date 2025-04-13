@@ -12,13 +12,11 @@ const agent = new BskyAgent({ service: 'https://bsky.social' });
       password: process.env.BLUESKY_PASSWORD
     });
 
-    // Fetch CSV
     const csvUrl = 'https://raw.githubusercontent.com/mflanagan201/gcal_auto/main/ECON_CAL.CSV';
     const res = await fetch(csvUrl);
     const csvText = await res.text();
-
-    // Parse CSV
     const parsed = Papa.parse(csvText, { header: true }).data;
+
     console.log("CSV rows received:", parsed.length);
     console.log("Sample row:", parsed[0]);
 
@@ -37,15 +35,20 @@ const agent = new BskyAgent({ service: 'https://bsky.social' });
       return;
     }
 
-    const lines = releases.slice(0, 6).map(r => {
+    const lines = releases.map(r => {
       const date = new Date(r.DTSTART.replace(' ', 'T'));
       const day = date.toLocaleDateString(undefined, { weekday: 'short' });
       return `• ${day}: ${r.SUMMARY}`;
     });
 
-    const post = `This Week's Irish Economic Releases:\n${lines.join('\n')}\n\nMore at macrocalendar.com`;
+    let body = "This Week's Irish Economic Releases:\n";
+    for (const line of lines) {
+      if ((body + line + '\n\nMore at macrocalendar.com').length > 300) break;
+      body += line + '\n';
+    }
+    body += '\nMore at macrocalendar.com';
 
-    await agent.post({ text: post });
+    await agent.post({ text: body });
     console.log('Bluesky post sent successfully!');
   } catch (err) {
     console.error('Bluesky post failed:', err.message);
