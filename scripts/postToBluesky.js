@@ -1,4 +1,7 @@
-import { BskyAgent } from '@atproto/api';
+import pkg from '@atproto/api';
+const { BskyAgent } = pkg;
+
+console.log("Starting Bluesky post...");
 
 const agent = new BskyAgent({ service: 'https://bsky.social' });
 
