@@ -19,12 +19,15 @@ const agent = new BskyAgent({ service: 'https://bsky.social' });
 
     // Parse CSV
     const parsed = Papa.parse(csvText, { header: true }).data;
+    console.log("CSV rows received:", parsed.length);
+    console.log("Sample row:", parsed[0]);
 
     const now = new Date();
     const nextWeek = new Date();
     nextWeek.setDate(now.getDate() + 5);
 
     const releases = parsed.filter(r => {
+      if (!r.DTSTART || !r.SUMMARY) return false;
       const date = new Date(r.DTSTART.replace(' ', 'T'));
       return date >= now && date <= nextWeek;
     });
