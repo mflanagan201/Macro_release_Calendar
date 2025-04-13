@@ -1,8 +1,7 @@
-const fetch = require('node-fetch');
-const Papa = require('papaparse');
-const { TwitterApi } = require('twitter-api-v2');
+import fetch from 'node-fetch';
+import Papa from 'papaparse';
+import { TwitterApi } from 'twitter-api-v2';
 
-// Initialize Twitter client with secrets
 const client = new TwitterApi({
   appKey: process.env.TWITTER_API_KEY,
   appSecret: process.env.TWITTER_API_SECRET,
@@ -12,23 +11,20 @@ const client = new TwitterApi({
 
 (async () => {
   try {
-    // Fetch CSV
-    const csvUrl = 'https://raw.githubusercontent.com/mflanagan201/Macro_release_Calendar/main/ECON_CAL.CSV';
+    const csvUrl = 'https://raw.githubusercontent.com/mflanagan201/gcal_auto/main/ECON_CAL.CSV';
     const res = await fetch(csvUrl);
     const csvText = await res.text();
 
-    // Parse CSV
     const parsed = Papa.parse(csvText, { header: true }).data;
 
     const now = new Date();
     const nextWeek = new Date();
     nextWeek.setDate(now.getDate() + 7);
 
-    // Filter and sanitize events
     const releases = parsed.filter(r => {
-      const rawDate = (r.DTSTART || '').trim().replace(' ', 'T');
-      const date = new Date(rawDate);
-      if (isNaN(date)) return false;
+      const dateStr = r.DTSTART?.replace(' ', 'T');
+      if (!dateStr) return false;
+      const date = new Date(dateStr);
       return date >= now && date <= nextWeek;
     });
 
@@ -37,18 +33,14 @@ const client = new TwitterApi({
       return;
     }
 
-    // Build the tweet (first 6 entries max)
     const lines = releases.slice(0, 6).map(r => {
-      const rawDate = (r.DTSTART || '').trim().replace(' ', 'T');
-      const date = new Date(rawDate);
+      const date = new Date(r.DTSTART.replace(' ', 'T'));
       const day = date.toLocaleDateString(undefined, { weekday: 'short' });
-      const title = r.SUMMARY || 'Unnamed release';
-      return `• ${day}: ${title}`;
+      return `• ${day}: ${r.SUMMARY}`;
     });
 
     const tweet = `Next Week's Economic Releases:\n${lines.join('\n')}\n\nMore: macrocalendar.com`;
 
-    // Post the tweet
     await client.v2.tweet(tweet);
     console.log('Tweet sent successfully!');
   } catch (err) {
