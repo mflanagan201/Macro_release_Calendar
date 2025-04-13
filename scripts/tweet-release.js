@@ -12,15 +12,12 @@ const client = new TwitterApi({
 
 (async () => {
   try {
-    // Fetch CSV file
     const csvUrl = 'https://raw.githubusercontent.com/mflanagan201/gcal_auto/main/ECON_CAL.CSV';
     const res = await fetch(csvUrl);
     const csvText = await res.text();
 
-    // Parse CSV
     const parsed = Papa.parse(csvText, { header: true }).data;
 
-    // Filter upcoming week
     const now = new Date();
     const nextWeek = new Date();
     nextWeek.setDate(now.getDate() + 7);
@@ -45,7 +42,6 @@ const client = new TwitterApi({
 
     const tweet = `Next Week's Economic Releases:\n${lines.join('\n')}\n\nMore: macrocalendar.com`;
 
-    // Post the tweet
     await client.v2.tweet(tweet);
     console.log('Tweet sent successfully!');
   } catch (err) {
