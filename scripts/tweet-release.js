@@ -1,7 +1,7 @@
-const fetch = require('node-fetch');
-const Papa = require('papaparse');
-const { TwitterApi } = require('twitter-api-v2');
-const fs = require('fs');
+import fetch from 'node-fetch';
+import Papa from 'papaparse';
+import { TwitterApi } from 'twitter-api-v2';
+import fs from 'fs';
 
 const client = new TwitterApi({
   appKey: process.env.TWITTER_API_KEY,
@@ -26,7 +26,9 @@ const client = new TwitterApi({
     nextWeek.setDate(now.getDate() + 7);
 
     const releases = parsed.filter(r => {
-      const date = new Date(r.DTSTART.replace(' ', 'T'));
+      const dateStr = r.DTSTART?.replace(' ', 'T');
+      if (!dateStr) return false;
+      const date = new Date(dateStr);
       return date >= now && date <= nextWeek;
     });
 
