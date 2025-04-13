@@ -13,7 +13,7 @@ const client = new TwitterApi({
 (async () => {
   try {
     // Fetch CSV file
-    const csvUrl = 'https://raw.githubusercontent.com/mflanagan201/Macro_release_Calendar/main/ECON_CAL.CSV';
+       const csvUrl = 'https://raw.githubusercontent.com/mflanagan201/gcal_auto/main/ECON_CAL.CSV';
     const res = await fetch(csvUrl);
     const csvText = await res.text();
 
