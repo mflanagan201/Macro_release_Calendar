@@ -1,0 +1,18 @@
+name: Weekly Bluesky Post
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Every Monday at 9 AM UTC
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: npm install
+      - run: node postToBluesky.js
+        env:
+          BLUESKY_USER: ${{ secrets.BLUESKY_USER }}
+          BLUESKY_PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
