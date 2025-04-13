@@ -14,32 +14,38 @@ const client = new TwitterApi({
     const csvUrl = 'https://raw.githubusercontent.com/mflanagan201/gcal_auto/main/ECON_CAL.CSV';
     const res = await fetch(csvUrl);
     const csvText = await res.text();
-
     const parsed = Papa.parse(csvText, { header: true }).data;
+
+    console.log("CSV rows received:", parsed.length);
+    console.log("Sample row:", parsed[0]);
 
     const now = new Date();
     const nextWeek = new Date();
-    nextWeek.setDate(now.getDate() + 7);
+    nextWeek.setDate(now.getDate() + 5);
 
     const releases = parsed.filter(r => {
-      const dateStr = r.DTSTART?.replace(' ', 'T');
-      if (!dateStr) return false;
-      const date = new Date(dateStr);
+      if (!r.DTSTART || !r.SUMMARY) return false;
+      const date = new Date(r.DTSTART.replace(' ', 'T'));
       return date >= now && date <= nextWeek;
     });
 
     if (!releases.length) {
-      console.log('No releases found for next week.');
+      console.log('No Irish economic releases in the next 5 days.');
       return;
     }
 
-    const lines = releases.slice(0, 6).map(r => {
+    const lines = releases.map(r => {
       const date = new Date(r.DTSTART.replace(' ', 'T'));
       const day = date.toLocaleDateString(undefined, { weekday: 'short' });
       return `• ${day}: ${r.SUMMARY}`;
     });
 
-    const tweet = `Next Week's Economic Releases:\n${lines.join('\n')}\n\nMore: macrocalendar.com`;
+    let tweet = "This Week's Irish Economic Releases:\n";
+    for (const line of lines) {
+      if ((tweet + line + '\n\nMore at macrocalendar.com').length > 280) break;
+      tweet += line + '\n';
+    }
+    tweet += '\nMore at macrocalendar.com';
 
     await client.v2.tweet(tweet);
     console.log('Tweet sent successfully!');
