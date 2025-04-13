@@ -41,12 +41,13 @@ const agent = new BskyAgent({ service: 'https://bsky.social' });
       return `• ${day}: ${r.SUMMARY}`;
     });
 
-    let body = "This Week's Irish Economic Releases:\n";
+    const hashtags = '\n#Irisheconomy #ireland #economy #centralbank';
+    let body = "This Week's Irish Economic Releases:\n\n";
     for (const line of lines) {
-      if ((body + line + '\n\nMore at macrocalendar.com').length > 300) break;
-      body += line + '\n';
+      if ((body + line + '\n\nhttps://www.macrocalendar.com' + hashtags).length > 300) break;
+      body += line + '\n\n';
     }
-    body += '\nMore at macrocalendar.com';
+    body += 'https://www.macrocalendar.com' + hashtags;
 
     await agent.post({ text: body });
     console.log('Bluesky post sent successfully!');
