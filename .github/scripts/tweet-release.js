@@ -40,12 +40,13 @@ const client = new TwitterApi({
       return `• ${day}: ${r.SUMMARY}`;
     });
 
-    let body = "This Week's Irish Economic Releases:\n";
+    const hashtags = '\n#Irisheconomy #ireland #economy #centralbank';
+    let body = "This Week's Irish Economic Releases:\n\n";
     for (const line of lines) {
-      if ((body + line + '\n\nMore at macrocalendar.com').length > 280) break;
-      body += line + '\n';
+      if ((body + line + '\n\nMore at macrocalendar.com' + hashtags).length > 280) break;
+      body += line + '\n\n';
     }
-    body += '\nMore at macrocalendar.com';
+    body += 'More at macrocalendar.com' + hashtags;
 
     const response = await client.v2.tweet(body);
     console.log('Tweet sent successfully!', response);
