@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import Papa from 'papaparse';
 import pkg from '@atproto/api';
-const { BskyAgent } = pkg;
+const { BskyAgent, RichText } = pkg;
 
 const agent = new BskyAgent({ service: 'https://bsky.social' });
 
@@ -47,11 +47,18 @@ const agent = new BskyAgent({ service: 'https://bsky.social' });
       if ((body + nextLine + 'More: https://www.macrocalendar.com\n\n#Irisheconomy #ireland #economy #centralbank').length > 300) break;
       body += nextLine;
     }
-
     body += 'More: https://www.macrocalendar.com\n\n';
     body += '#Irisheconomy #ireland #economy #centralbank';
 
-    await agent.post({ text: body });
+    // Use RichText to automatically detect and apply facets for links and hashtags
+    const rt = new RichText({ text: body });
+    await rt.detectFacets();
+
+    await agent.post({
+      text: rt.text,
+      facets: rt.facets,
+    });
+
     console.log('Bluesky post sent successfully!');
   } catch (err) {
     console.error('Bluesky post failed:', err.message);
