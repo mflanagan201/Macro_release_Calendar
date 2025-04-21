@@ -1,12 +1,12 @@
-const fetch = require('node-fetch');
-const Papa = require('papaparse');
+import fetch from 'node-fetch';
+import Papa from 'papaparse';
 
 // 1. Fetch email signups from GitHub Issues
 async function getEmails() {
   const issues = await fetch('https://api.github.com/repos/mflanagan201/Macro_release_Calendar/issues?labels=signup', {
     headers: {
       'Accept': 'application/vnd.github.v3+json',
-      'Authorization': `Bearer ${process.env.GITHUB_TOKEN || ''}` // optional if public repo
+      'Authorization': `Bearer ${process.env.GITHUB_TOKEN || ''}`
     }
   }).then(res => res.json());
 
@@ -39,7 +39,6 @@ function formatEmail(releases) {
     return '<p>There are no economic indicators scheduled for next week.</p>';
   }
 
-  // Limit to 15 items
   const limitedReleases = releases.slice(0, 15);
 
   const listItems = limitedReleases.map(r => {
