@@ -34,26 +34,24 @@ async function getReleases() {
 }
 
 // 3. Format the email
-
 function formatEmail(releases) {
   if (!releases.length) {
     return '<p>There are no economic indicators scheduled for next week.</p>';
   }
 
-  const spacerImageUrl = 'https://your-server.com/path-to-transparent.gif'; // Replace with your image URL
+  // Limit to 15 items
+  const limitedReleases = releases.slice(0, 15);
 
-  const listItems = releases.map(r => {
+  const listItems = limitedReleases.map(r => {
     const date = new Date(r.DTSTART.replace(' ', 'T'));
     const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
     const fullDate = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
     const title = r.SUMMARY || 'Unnamed release';
 
     return `
-      <div>
-        <strong>${weekday}, ${fullDate}</strong> — ${title}
-      </div>
-      <div>
-        <img src="${spacerImageUrl}" alt="" style="display:block; width:1px; height:20px; line-height:20px; font-size:0px;">
+      <div style="padding: 12px 0; border-bottom: 1px solid #ddd;">
+        <strong>${weekday}, ${fullDate}</strong><br/>
+        ${title}
       </div>
     `;
   }).join('');
@@ -72,16 +70,15 @@ function formatEmail(releases) {
   `;
 }
 
-
-
 // 4. Send via Brevo
 async function sendEmail(toEmails, html) {
   const body = {
-  sender: { name: "Macro Calendar", email: "noreply@macrocalendar.com" },  // Make sure this is verified in Brevo
-  to: [{ email: TO_EMAIL }],
-  subject: "Test Email from Macro Release Calendar",
-  htmlContent: html
-};
+    sender: { name: "Macro Calendar", email: "noreply@macrocalendar.com" },
+    to: toEmails.map(email => ({ email })),
+    subject: "Weekly Economic Calendar",
+    htmlContent: html
+  };
+
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
@@ -99,6 +96,7 @@ async function sendEmail(toEmails, html) {
   console.log("Email sent to:", toEmails.join(', '));
 }
 
+// 5. Run the job
 (async () => {
   try {
     const emails = await getEmails();
