@@ -1,118 +1,71 @@
 import fetch from 'node-fetch';
 import Papa from 'papaparse';
 
-// 1. Fetch email signups from GitHub Issues
-async function getEmails() {
-  const res = await fetch('https://api.github.com/repos/mflanagan201/Macro_release_Calendar/issues?labels=signup', {
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+
+const owner = 'mflanagan201';
+const repo = 'Macro_release_Calendar';
+
+async function fetchIssues() {
+  const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues`, {
     headers: {
+      'Authorization': `token ${GITHUB_TOKEN}`,
       'Accept': 'application/vnd.github.v3+json',
-      'Authorization': `Bearer ${process.env.GITHUB_TOKEN || ''}`
+      'User-Agent': 'github-action'
     }
   });
 
-  const issues = await res.json();
+  const data = await response.json();
 
-  if (!Array.isArray(issues)) {
-    console.error("Unexpected response from GitHub API:", issues);
-    throw new Error("Failed to fetch issues from GitHub. Response was not an array.");
+  if (!Array.isArray(data)) {
+    throw new Error(`Failed to fetch issues from GitHub. Response was not an array: ${JSON.stringify(data)}`);
   }
 
-  return issues.map(issue => {
-    const match = issue.title.match(/New Signup:\s*(.*)/);
-    return match ? match[1].trim() : null;
-  }).filter(Boolean);
+  return data;
 }
 
-// 2. Fetch and parse releases from CSV
-async function getReleases() {
-  const csvUrl = 'https://raw.githubusercontent.com/mflanagan201/gcal_auto/main/ECON_CAL.CSV';
-  const csvData = await fetch(csvUrl).then(res => res.text());
-
-  const { data } = Papa.parse(csvData, { header: true });
-  const now = new Date();
-  const nextWeek = new Date();
-  nextWeek.setDate(now.getDate() + 7);
-
-  return data.filter(item => {
-    if (!item.DTSTART) return false;
-    const date = new Date(item.DTSTART.replace(' ', 'T'));
-    return date >= now && date <= nextWeek;
-  });
+function generateCSV(issues) {
+  const csv = Papa.unparse(
+    issues.map(issue => ({
+      Title: issue.title,
+      URL: issue.html_url,
+      Created_At: issue.created_at
+    }))
+  );
+  return csv;
 }
 
-// 3. Format the email
-function formatEmail(releases) {
-  if (!releases.length) {
-    return '<p>There are no economic indicators scheduled for next week.</p>';
-  }
-
-  const limitedReleases = releases.slice(0, 15);
-
-  const listItems = limitedReleases.map(r => {
-    const date = new Date(r.DTSTART.replace(' ', 'T'));
-    const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
-    const fullDate = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
-    const title = r.SUMMARY || 'Unnamed release';
-
-    return `
-      <div style="padding: 12px 0; border-bottom: 1px solid #ddd;">
-        <strong>${weekday}, ${fullDate}</strong><br/>
-        ${title}
-      </div>
-    `;
-  }).join('');
-
-  return `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
-      <h2 style="color: #2C3E50;">Weekly Economic Calendar</h2>
-      <p style="font-style: italic; color: #555;">
-        Hi, the following indicators will be released next week:
-      </p>
-      <div style="font-size: 15px;">
-        ${listItems}
-      </div>
-      <p style="margin-top: 30px; font-size: 14px; color: #888;">— Macro Release Calendar</p>
-    </div>
-  `;
-}
-
-// 4. Send via Brevo
-async function sendEmail(toEmails, html) {
-  const body = {
-    sender: { name: "Macro Calendar", email: "noreply@macrocalendar.com" },
-    to: toEmails.map(email => ({ email })),
-    subject: "Weekly Economic Calendar",
-    htmlContent: html
-  };
-
-  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-    method: "POST",
+async function sendEmail(csv) {
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
     headers: {
-      "api-key": process.env.BREVO_API_KEY,
-      "Content-Type": "application/json"
+      'api-key': BREVO_API_KEY,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify({
+      sender: { name: 'Macro Bot', email: 'your_sender_email@example.com' },
+      to: [{ email: 'recipient@example.com', name: 'Recipient' }],
+      subject: 'Weekly Macro Release Update',
+      htmlContent: `<p>Attached is your weekly update.</p><pre>${csv}</pre>`
+    })
   });
 
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Failed to send email: ${errText}`);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to send email: ${response.status} - ${errorText}`);
   }
-
-  console.log("Email sent to:", toEmails.join(', '));
 }
 
-// 5. Run the job
 (async () => {
   try {
-    const emails = await getEmails();
-    if (!emails.length) throw new Error("No email signups found.");
-
-    const releases = await getReleases();
-    const html = formatEmail(releases);
-    await sendEmail(emails, html);
+    const issues = await fetchIssues();
+    const csv = generateCSV(issues);
+    await sendEmail(csv);
+    console.log('Weekly email sent successfully.');
   } catch (err) {
-    console.error("Error in weekly email:", err.message);
+    console.error('Error in weekly email:', err.message);
     process.exit(1);
   }
 })();
