@@ -45,8 +45,8 @@ async function sendEmail(csv) {
       'Accept': 'application/json'
     },
     body: JSON.stringify({
-      sender: { name: 'Macro Bot', email: 'your_sender_email@example.com' },
-      to: [{ email: 'recipient@example.com', name: 'Recipient' }],
+      sender: { name: 'Macro Calendar', email: 'noreply@macrocalendar.com' },
+      to: [{ email: TO_EMAIL }],
       subject: 'Weekly Macro Release Update',
       htmlContent: `<p>Attached is your weekly update.</p><pre>${csv}</pre>`
     })
