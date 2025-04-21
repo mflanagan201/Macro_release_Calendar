@@ -3,12 +3,19 @@ import Papa from 'papaparse';
 
 // 1. Fetch email signups from GitHub Issues
 async function getEmails() {
-  const issues = await fetch('https://api.github.com/repos/mflanagan201/Macro_release_Calendar/issues?labels=signup', {
+  const res = await fetch('https://api.github.com/repos/mflanagan201/Macro_release_Calendar/issues?labels=signup', {
     headers: {
       'Accept': 'application/vnd.github.v3+json',
       'Authorization': `Bearer ${process.env.GITHUB_TOKEN || ''}`
     }
-  }).then(res => res.json());
+  });
+
+  const issues = await res.json();
+
+  if (!Array.isArray(issues)) {
+    console.error("Unexpected response from GitHub API:", issues);
+    throw new Error("Failed to fetch issues from GitHub. Response was not an array.");
+  }
 
   return issues.map(issue => {
     const match = issue.title.match(/New Signup:\s*(.*)/);
