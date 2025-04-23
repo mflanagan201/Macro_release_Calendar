@@ -143,4 +143,7 @@ async function sendEmail(toEmails, html) {
     const html = formatEmail(releases);
     await sendEmail(emails, html);
   } catch (err) {
-    console.error("Error in weekly email:", err0
+    console.error("Error in weekly email:", err.message);
+    process.exit(1);
+  }
+})();
