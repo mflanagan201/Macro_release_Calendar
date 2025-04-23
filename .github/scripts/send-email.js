@@ -65,17 +65,18 @@ function formatEmail(releases) {
     const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
     const fullDate = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
     const summary = r.SUMMARY || 'Unnamed release';
-    const location = r.LOCATION ? ` (${r.LOCATION})` : '';
+    const location = r.LOCATION || '—';
 
     return `
-      <div style="margin-bottom: 30px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
-        <div style="color: #4A90E2; font-weight: bold; font-size: 16px;">
-          ${weekday}, ${fullDate}
-        </div>
-        <div style="font-size: 15px; color: #333;">
-          ${summary}${location}
-        </div>
-      </div>
+      <tr style="border-bottom: 1px solid #ddd; padding: 10px 0;">
+        <td style="padding: 10px;">
+          <strong>${weekday}, ${fullDate}</strong><br/>
+          ${summary}
+        </td>
+        <td style="padding: 10px; text-align: right; color: #666;">
+          ${location}
+        </td>
+      </tr>
     `;
   }).join('\n');
 
@@ -85,7 +86,9 @@ function formatEmail(releases) {
       <p style="font-style: italic; color: #555;">
         Below are up to 15 economic indicators scheduled for next week:
       </p>
-      ${entries}
+      <table style="width: 100%; border-collapse: collapse;">
+        ${entries}
+      </table>
       <p style="margin-top: 30px; font-size: 14px; color: #888;">— Macro Release Calendar</p>
     </div>
   `;
@@ -117,7 +120,7 @@ async function sendEmail(toEmails, html) {
   console.log("Email sent to:", toEmails.join(', '));
 }
 
-// 5. Run the whole process
+// 5. Main function
 (async () => {
   try {
     const emails = await getEmails();
