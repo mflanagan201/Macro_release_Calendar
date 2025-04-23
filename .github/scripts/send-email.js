@@ -4,14 +4,12 @@ import Papa from 'papaparse';
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
-
 const owner = 'mflanagan201';
 const repo = 'Macro_release_Calendar';
 
-
 // 1. Fetch email signups from GitHub Issues
 async function getEmails() {
-  const res = await fetch('https://api.github.com/repos/mflanagan201/Macro_release_Calendar/issues?labels=signup', {
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues?labels=signup`, {
     headers: {
       'Accept': 'application/vnd.github.v3+json'
     }
@@ -55,19 +53,41 @@ async function getReleases() {
 
 // 3. Format the email
 function formatEmail(releases) {
-  if (!releases.length) return '<p>There are no economic indicators scheduled for next week.</p>';
+  const maxReleases = 15;
+  const limited = releases.slice(0, maxReleases);
 
-  const listItems = releases.map(r => {
+  if (!limited.length) {
+    return '<p>There are no economic indicators scheduled for next week.</p>';
+  }
+
+  const entries = limited.map(r => {
     const date = new Date(r.DTSTART.replace(' ', 'T'));
     const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
     const fullDate = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
-    return `<li><strong>${weekday}, ${fullDate}</strong> — ${r.SUMMARY || 'Unnamed release'}${r.LOCATION ? ` (${r.LOCATION})` : ''}</li>`;
+    const summary = r.SUMMARY || 'Unnamed release';
+    const location = r.LOCATION ? ` (${r.LOCATION})` : '';
+
+    return `
+      <div style="margin-bottom: 30px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+        <div style="color: #4A90E2; font-weight: bold; font-size: 16px;">
+          ${weekday}, ${fullDate}
+        </div>
+        <div style="font-size: 15px; color: #333;">
+          ${summary}${location}
+        </div>
+      </div>
+    `;
   }).join('\n');
 
   return `
-    <p>Here are the key economic indicators scheduled for next week:</p>
-    <ul>${listItems}</ul>
-    <p>— Macro Release Calendar</p>
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
+      <h2 style="color: #2C3E50;">Weekly Economic Calendar</h2>
+      <p style="font-style: italic; color: #555;">
+        Below are up to 15 economic indicators scheduled for next week:
+      </p>
+      ${entries}
+      <p style="margin-top: 30px; font-size: 14px; color: #888;">— Macro Release Calendar</p>
+    </div>
   `;
 }
 
@@ -83,7 +103,7 @@ async function sendEmail(toEmails, html) {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
-      "api-key": process.env.BREVO_API_KEY,
+      "api-key": BREVO_API_KEY,
       "Content-Type": "application/json"
     },
     body: JSON.stringify(body)
@@ -97,6 +117,7 @@ async function sendEmail(toEmails, html) {
   console.log("Email sent to:", toEmails.join(', '));
 }
 
+// 5. Run the whole process
 (async () => {
   try {
     const emails = await getEmails();
@@ -110,8 +131,3 @@ async function sendEmail(toEmails, html) {
     process.exit(1);
   }
 })();
-
-
-
-
-
