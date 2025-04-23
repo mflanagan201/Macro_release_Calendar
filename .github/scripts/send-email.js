@@ -81,74 +81,54 @@ function formatEmail(releases) {
         </tbody>
       </table>
       <p style="margin-top: 30px; font-size: 14px; color: #888;">— Macro Release Calendar</p>
-      <p style="font-size: 12px; color: #888;">
-        To unsubscribe, <a href="https://yourdomain.com/unsubscribe?email=EMAIL_PLACEHOLDER">click here</a>.
-      </p>
     </div>
   `;
 }
 
 // 4. Send via Brevo
-async function sendEmail(toEmails, html) {
-  const body = {
-    sender: { name: "Macro Calendar", email: "noreply@macrocalendar.com" },
-    to: toEmails.map(email => ({ email })),
-    subject: "Upcoming Economic Releases – Weekly Summary",
-    htmlContent: html
-  };
+async function sendEmail(toEmails, htmlContents) {
+  for (let i = 0; i < toEmails.length; i++) {
+    const email = toEmails[i];
+    const html = htmlContents[i];
 
-  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-    method: "POST",
-    headers: {
-      "api-key": BREVO_API_KEY,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
+    const body = {
+      sender: { name: "Macro Calendar", email: "noreply@macrocalendar.com" },
+      to: [{ email }],
+      subject: "Upcoming Economic Releases – Weekly Summary",
+      htmlContent: html
+    };
 
-  const text = await res.text();
-  if (!res.ok) {
-    throw new Error(`Failed to send email: ${text}`);
-  }
+    try {
+      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "api-key": BREVO_API_KEY,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
 
-  console.log("Email sent to:", toEmails.join(', '));
-}
-
-// 5. Unsubscribe function
-async function unsubscribeEmail(email) {
-  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues?labels=signup`, {
-    headers: {
-      'Accept': 'application/vnd.github.v3+json',
-      'Authorization': `token ${GITHUB_TOKEN}`
+      const text = await res.text();
+      if (!res.ok) {
+        console.error(`Failed to send email to ${email}: ${text}`);
+      } else {
+        console.log(`Email sent to: ${email}`);
+      }
+    } catch (error) {
+      console.error(`Error sending email to ${email}: ${error.message}`);
     }
-  });
-
-  const issues = await res.json();
-  const issue = issues.find(issue => issue.title.includes(email));
-  if (issue) {
-    await fetch(`https://api.github.com/repos/${owner}/${repo}/issues/${issue.number}`, {
-      method: 'PATCH',
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'Authorization': `token ${GITHUB_TOKEN}`
-      },
-      body: JSON.stringify({ state: 'closed' })
-    });
-    console.log(`Unsubscribed: ${email}`);
-  } else {
-    console.log(`Email not found: ${email}`);
   }
 }
 
-// 6. Main execution
+// 5. Main execution
 (async () => {
   try {
     const emails = await getEmails();
     if (!emails.length) throw new Error("No email signups found.");
 
     const releases = await getReleases();
-    const html = formatEmail(releases);
-    await sendEmail(emails, html);
+    const htmlContents = emails.map(() => formatEmail(releases));
+    await sendEmail(emails, htmlContents);
   } catch (err) {
     console.error("Error in weekly email:", err.message);
     process.exit(1);
