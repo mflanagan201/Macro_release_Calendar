@@ -11,21 +11,12 @@ const repo = 'Macro_release_Calendar';
 async function getEmails() {
   const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues?labels=signup`, {
     headers: {
-      'Accept': 'application/vnd.github.v3+json'
+      'Accept': 'application/vnd.github.v3+json',
+      'Authorization': `token ${GITHUB_TOKEN}`
     }
   });
 
-  const contentType = res.headers.get('content-type');
-  if (!res.ok || !contentType.includes('application/json')) {
-    const errorText = await res.text();
-    throw new Error(`GitHub Issues API error: ${errorText}`);
-  }
-
   const issues = await res.json();
-  if (!Array.isArray(issues)) {
-    throw new Error(`Unexpected GitHub response format: ${JSON.stringify(issues)}`);
-  }
-
   return issues
     .map(issue => {
       const match = issue.title.match(/New Signup:\s*(.*)/);
@@ -44,11 +35,13 @@ async function getReleases() {
   const nextWeek = new Date();
   nextWeek.setDate(now.getDate() + 7);
 
-  return data.filter(item => {
-    if (!item.DTSTART) return false;
-    const date = new Date(item.DTSTART.replace(' ', 'T'));
-    return date >= now && date <= nextWeek;
-  }).slice(0, 15); // Limit to 15 releases
+  return data
+    .filter(item => {
+      if (!item.DTSTART) return false;
+      const date = new Date(item.DTSTART.replace(' ', 'T'));
+      return date >= now && date <= nextWeek;
+    })
+    .slice(0, 15); // Limit to 15 releases
 }
 
 // 3. Format the email
@@ -57,15 +50,15 @@ function formatEmail(releases) {
 
   const rows = releases.map(r => {
     const date = new Date(r.DTSTART.replace(' ', 'T'));
-    const weekday = date.toLocaleDateString(undefined, { weekday: 'long' });
-    const fullDate = date.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
+    const weekday = date.toLocaleDateString('en-IE', { weekday: 'long' });
+    const fullDate = date.toLocaleDateString('en-IE', { month: 'long', day: 'numeric' });
     const title = r.SUMMARY || 'Unnamed release';
     const location = r.LOCATION || 'N/A';
     return `
       <tr>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #ddd;">${weekday}, ${fullDate}</td>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #ddd;">${title}</td>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #ddd;">${location}</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">${weekday}, ${fullDate}</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">${title}</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">${location}</td>
       </tr>
     `;
   }).join('\n');
@@ -73,14 +66,14 @@ function formatEmail(releases) {
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
       <p style="font-style: italic; color: #555;">
-        Hi, here are the key economic indicators scheduled for next week:
+        Hi, the following indicators will be released next week:
       </p>
-      <table style="width: 100%; border-collapse: collapse;">
+      <table style="width: 100%; border-collapse: collapse; text-align: center;">
         <thead>
           <tr style="background-color: rgb(49, 84, 105); color: white;">
-            <th style="padding: 12px 8px; text-align: left;">Date</th>
-            <th style="padding: 12px 8px; text-align: left;">Indicator</th>
-            <th style="padding: 12px 8px; text-align: left;">Location</th>
+            <th style="padding: 12px; border: 1px solid #ddd;">Date</th>
+            <th style="padding: 12px; border: 1px solid #ddd;">Indicator</th>
+            <th style="padding: 12px; border: 1px solid #ddd;">Location</th>
           </tr>
         </thead>
         <tbody>
@@ -88,6 +81,9 @@ function formatEmail(releases) {
         </tbody>
       </table>
       <p style="margin-top: 30px; font-size: 14px; color: #888;">— Macro Release Calendar</p>
+      <p style="font-size: 12px; color: #888;">
+        To unsubscribe, <a href="https://yourdomain.com/unsubscribe?email=EMAIL_PLACEHOLDER">click here</a>.
+      </p>
     </div>
   `;
 }
@@ -127,38 +123,24 @@ async function unsubscribeEmail(email) {
     }
   });
 
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`GitHub Issues API error: ${errorText}`);
-  }
-
   const issues = await res.json();
   const issue = issues.find(issue => issue.title.includes(email));
-  if (!issue) {
-    console.log(`No signup issue found for ${email}`);
-    return;
+  if (issue) {
+    await fetch(`https://api.github.com/repos/${owner}/${repo}/issues/${issue.number}`, {
+      method: 'PATCH',
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': `token ${GITHUB_TOKEN}`
+      },
+      body: JSON.stringify({ state: 'closed' })
+    });
+    console.log(`Unsubscribed: ${email}`);
+  } else {
+    console.log(`Email not found: ${email}`);
   }
-
-  const issueNumber = issue.number;
-
-  // Remove the 'signup' label
-  const deleteRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}/labels/signup`, {
-    method: 'DELETE',
-    headers: {
-      'Accept': 'application/vnd.github.v3+json',
-      'Authorization': `token ${GITHUB_TOKEN}`
-    }
-  });
-
-  if (!deleteRes.ok) {
-    const errorText = await deleteRes.text();
-    throw new Error(`Failed to remove label: ${errorText}`);
-  }
-
-  console.log(`Unsubscribed ${email}`);
 }
 
-// 6. Main function
+// 6. Main execution
 (async () => {
   try {
     const emails = await getEmails();
