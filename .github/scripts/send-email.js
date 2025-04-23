@@ -4,8 +4,10 @@ import Papa from 'papaparse';
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
-const fetch = require('node-fetch');
-const Papa = require('papaparse');
+
+const owner = 'mflanagan201';
+const repo = 'Macro_release_Calendar';
+
 
 // 1. Fetch email signups from GitHub Issues
 async function getEmails() {
