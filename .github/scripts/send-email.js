@@ -80,7 +80,7 @@ function formatEmail(releases) {
           ${rows}
         </tbody>
       </table>
-      <p style="margin-top: 30px; font-size: 14px; color: #888;">— Macro Release Calendar</p>
+      <p style="margin-top: 30px; font-size: 14px; color: #888;">— mflanagan201@gmail.com</p>
     </div>
   `;
 }
@@ -94,7 +94,7 @@ async function sendEmail(toEmails, htmlContents) {
     const body = {
       sender: { name: "Macro Calendar", email: "noreply@macrocalendar.com" },
       to: [{ email }],
-      subject: "Upcoming Economic Releases – Weekly Summary",
+      subject: "Upcoming Economic Releases",
       htmlContent: html
     };
 
