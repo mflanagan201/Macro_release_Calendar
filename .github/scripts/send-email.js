@@ -65,7 +65,7 @@ function formatEmail(releases) {
 
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto;">
-      <p style="font-style: italic; color: #555;">
+      <p style="font-style: italic; color: #555;font-size:16px;">
         Hi, the following indicators will be released next week:
       </p>
       <table style="width: 100%; border-collapse: collapse; text-align: center;">
