@@ -50,26 +50,6 @@ function drawRoundedRect(ctx, x, y, width, height, radius, color) {
   ctx.fill();
 }
 
-function drawWrappedText(ctx, text, x, y, maxWidth) {
-  const words = text.split(' ');
-  let line = '';
-  let lineHeight = 18;
-
-  for (let n = 0; n < words.length; n++) {
-    const testLine = line + words[n] + ' ';
-    const metrics = ctx.measureText(testLine);
-    const testWidth = metrics.width;
-    if (testWidth > maxWidth && n > 0) {
-      ctx.fillText(line, x, y);
-      line = words[n] + ' ';
-      y += lineHeight;
-    } else {
-      line = testLine;
-    }
-  }
-  ctx.fillText(line, x, y);
-}
-
 async function generateImage(releases) {
   const width = 800;
   const rowHeight = 60;
@@ -90,25 +70,24 @@ async function generateImage(releases) {
   const col2Width = tableWidth * 0.6; // Indicator
   const col3Width = tableWidth * 0.2; // Location
 
-  const col1X = padding + 10;
-  const col2X = col1X + col1Width;
-  const col3X = col2X + col2Width;
+  const col1Center = padding + col1Width / 2;
+  const col2Center = padding + col1Width + col2Width / 2;
+  const col3Center = padding + col1Width + col2Width + col3Width / 2;
 
   // Draw header with rounded corners
   drawRoundedRect(ctx, padding, padding, tableWidth, headerHeight, radius, '#315469');
 
   ctx.fillStyle = 'white';
   ctx.font = 'bold 18px Arial';
-  ctx.textAlign = 'left';
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
-  ctx.fillText('Date', col1X, padding + headerHeight / 2);
-  ctx.fillText('Indicator', col2X, padding + headerHeight / 2);
-  ctx.fillText('Location', col3X, padding + headerHeight / 2);
+  ctx.fillText('Date', col1Center, padding + headerHeight / 2);
+  ctx.fillText('Indicator', col2Center, padding + headerHeight / 2);
+  ctx.fillText('Location', col3Center, padding + headerHeight / 2);
 
   // Draw rows
   ctx.font = '16px Arial';
-  ctx.textBaseline = 'top';
   releases.forEach((r, idx) => {
     const y = padding + headerHeight + idx * rowHeight;
 
@@ -123,9 +102,13 @@ async function generateImage(releases) {
     const dayStr = date.toLocaleDateString('en-IE', { weekday: 'short', month: 'short', day: 'numeric' });
 
     ctx.fillStyle = '#333';
-    drawWrappedText(ctx, dayStr, col1X, y + 10, col1Width - 20);
-    drawWrappedText(ctx, r.SUMMARY || 'Unnamed', col2X, y + 10, col2Width - 20);
-    drawWrappedText(ctx, r.LOCATION || 'Ireland', col3X, y + 10, col3Width - 20);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const textY = y + rowHeight / 2;
+
+    ctx.fillText(dayStr, col1Center, textY);
+    ctx.fillText(r.SUMMARY || 'Unnamed', col2Center, textY);
+    ctx.fillText(r.LOCATION || 'Ireland', col3Center, textY);
   });
 
   const buffer = canvas.toBuffer('image/png');
@@ -149,8 +132,8 @@ async function generateImage(releases) {
     const mediaId = await client.v1.uploadMedia(imagePath);
 
     // Compose the tweet text
-    const hashtags = "#Ireland #Economy #Macro";
-    const tweetText = `Upcoming Economic Releases for Ireland – see the full list below!\nhttps://www.macrocalendar.com/ ${hashtags}`;
+    const hashtags = "#IRE #economy #macro #nextweek #upcoming #eire";
+    const tweetText = `Upcoming Economic Releases for Ireland – see the full list at https://www.macrocalendar.com/ ${hashtags}`;
 
     // Send the tweet
     await client.v2.tweet({
