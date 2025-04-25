@@ -17,15 +17,17 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: npm install node-fetch@2 papaparse twitter-api-v2
-
-      - name: Install system dependencies canvas
+      - name: Install system dependencies for canvas
         run: |
-         sudo apt-get update
-         sudo apt-get install -y   
-         libpangocairo-1.0-0 libjpeg-dev   
-         libgif-dev librsvg2-dev
+          sudo apt-get update
+          sudo apt-get install -y \
+            libpangocairo-1.0-0 \
+            libjpeg-dev \
+            libgif-dev \
+            librsvg2-dev
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Tweet the weekly summary
         run: node .github/scripts/tweet-release.js
