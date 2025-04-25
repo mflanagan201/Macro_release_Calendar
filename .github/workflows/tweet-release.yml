@@ -1,38 +1,25 @@
-name: Tweet Weekly Releases
+name: Tweet
 
 on:
   schedule:
-    - cron: '0 9 * * 5'  # Every Friday at 09:00 UTC
+    - cron: '0 9 * * 1' # Adjust to your timing (example: every Monday at 9 AM UTC)
   workflow_dispatch:
 
 jobs:
   tweet:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
 
-      - name: Install system dependencies for canvas
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libpangocairo-1.0-0 \
-            libjpeg-dev \
-            libgif-dev \
-            librsvg2-dev
+    - name: Install dependencies
+      run: npm install  # <-- changed from `npm ci`
 
-      - name: Install Node.js dependencies
-        run: npm ci
-
-      - name: Tweet the weekly summary
-        run: node .github/scripts/tweet-release.js
-        env:
-          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
-          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
-          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-          TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
+    - name: Run script
+      run: npm start
