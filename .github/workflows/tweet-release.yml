@@ -26,8 +26,8 @@ jobs:
             libgif-dev \
             librsvg2-dev
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install Node.js dependencies
+        run: npm ci
 
       - name: Tweet the weekly summary
         run: node .github/scripts/tweet-release.js
