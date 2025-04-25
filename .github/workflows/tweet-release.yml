@@ -1,9 +1,9 @@
-name: Tweet Macro Calendar
+name: Tweet Release
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '0 12 * * *'  # Adjust your timing if needed
-  workflow_dispatch:     # Allow manual runs
+    - cron: '0 14 * * *' # Runs every day at 14:00 UTC
 
 jobs:
   tweet:
@@ -18,8 +18,11 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install project dependencies
         run: npm install
 
-      - name: Run Twitter posting script
+      - name: Install dotenv manually
+        run: npm install dotenv
+
+      - name: Run the tweet release script
         run: node .github/scripts/tweet-release.js
