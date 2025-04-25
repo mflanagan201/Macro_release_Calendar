@@ -34,15 +34,50 @@ async function fetchReleases() {
   });
 }
 
+function drawRoundedRect(ctx, x, y, width, height, radius, color) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function drawWrappedText(ctx, text, x, y, maxWidth) {
+  const words = text.split(' ');
+  let line = '';
+  let lineHeight = 18;
+
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = ctx.measureText(testLine);
+    const testWidth = metrics.width;
+    if (testWidth > maxWidth && n > 0) {
+      ctx.fillText(line, x, y);
+      line = words[n] + ' ';
+      y += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, x, y);
+}
+
 async function generateImage(releases) {
   const width = 800;
   const rowHeight = 60;
   const padding = 20;
   const headerHeight = 60;
-  const footerHeight = 40;
   const tableWidth = width - padding * 2;
   const radius = 10;
-  const totalHeight = padding * 2 + headerHeight + rowHeight * releases.length + footerHeight;
+  const totalHeight = padding * 2 + headerHeight + rowHeight * releases.length;
 
   const canvas = createCanvas(width, totalHeight);
   const ctx = canvas.getContext('2d');
@@ -51,15 +86,15 @@ async function generateImage(releases) {
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, width, totalHeight);
 
-  const col1Width = tableWidth * 0.2;
-  const col2Width = tableWidth * 0.5;
-  const col3Width = tableWidth * 0.3;
+  const col1Width = tableWidth * 0.2; // Date
+  const col2Width = tableWidth * 0.6; // Indicator
+  const col3Width = tableWidth * 0.2; // Location
 
   const col1X = padding + 10;
-  const col2X = padding + col1Width + 10;
-  const col3X = padding + col1Width + col2Width + 10;
+  const col2X = col1X + col1Width;
+  const col3X = col2X + col2Width;
 
-  // Draw rounded header background
+  // Draw header with rounded corners
   drawRoundedRect(ctx, padding, padding, tableWidth, headerHeight, radius, '#315469');
 
   ctx.fillStyle = 'white';
@@ -77,7 +112,7 @@ async function generateImage(releases) {
   releases.forEach((r, idx) => {
     const y = padding + headerHeight + idx * rowHeight;
 
-    // Alternate row colors
+    // Alternate row background
     ctx.fillStyle = idx % 2 === 0 ? 'white' : '#f9f9f9';
     ctx.fillRect(padding, y, tableWidth, rowHeight);
 
@@ -93,61 +128,10 @@ async function generateImage(releases) {
     drawWrappedText(ctx, r.LOCATION || 'Ireland', col3X, y + 10, col3Width - 20);
   });
 
-  // Footer
-  ctx.font = '14px Arial';
-  ctx.fillStyle = '#888';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('— mflanagan201@gmail.com', width / 2, totalHeight - padding);
-
   const buffer = canvas.toBuffer('image/png');
   const filePath = path.join('/tmp', 'releases.png');
   await fs.writeFile(filePath, buffer);
   return filePath;
-}
-
-// Draw a rounded rectangle
-function drawRoundedRect(ctx, x, y, width, height, radius, fillColor) {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
-  ctx.fillStyle = fillColor;
-  ctx.fill();
-}
-
-// Helper function to wrap text
-function drawWrappedText(ctx, text, x, y, maxWidth) {
-  const words = text.split(' ');
-  let line = '';
-  const lineHeight = 18;
-  let linesDrawn = 0;
-
-  for (let n = 0; n < words.length; n++) {
-    const testLine = line + words[n] + ' ';
-    const metrics = ctx.measureText(testLine);
-    const testWidth = metrics.width;
-
-    if (testWidth > maxWidth && n > 0) {
-      ctx.fillText(line.trim(), x, y + linesDrawn * lineHeight);
-      line = words[n] + ' ';
-      linesDrawn++;
-      if (linesDrawn >= 2) {
-        ctx.fillText('...', x, y + linesDrawn * lineHeight);
-        return;
-      }
-    } else {
-      line = testLine;
-    }
-  }
-  ctx.fillText(line.trim(), x, y + linesDrawn * lineHeight);
 }
 
 (async () => {
@@ -164,9 +148,11 @@ function drawWrappedText(ctx, text, x, y, maxWidth) {
     // Upload the image to Twitter
     const mediaId = await client.v1.uploadMedia(imagePath);
 
+    // Compose the tweet text
     const hashtags = "#Ireland #Economy #Macro";
-    const tweetText = `Upcoming Economic Releases for Ireland – see the full list below! ${hashtags}`;
+    const tweetText = `Upcoming Economic Releases for Ireland – see the full list below!\nhttps://www.macrocalendar.com/ ${hashtags}`;
 
+    // Send the tweet
     await client.v2.tweet({
       text: tweetText,
       media: {
