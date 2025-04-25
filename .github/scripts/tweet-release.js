@@ -36,37 +36,57 @@ async function fetchReleases() {
 
 async function generateImage(releases) {
   const width = 800;
-  const rowHeight = 40;
+  const rowHeight = 50;
   const padding = 20;
   const headerHeight = 60;
-  const height = padding * 2 + headerHeight + rowHeight * releases.length;
+  const footerHeight = 40;
+  const totalHeight = padding * 2 + headerHeight + rowHeight * releases.length + footerHeight;
 
-  const canvas = createCanvas(width, height);
+  const canvas = createCanvas(width, totalHeight);
   const ctx = canvas.getContext('2d');
 
   // Background
   ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillRect(0, 0, width, totalHeight);
 
-  // Title
+  // Table header background
+  const headerTop = padding;
   ctx.fillStyle = '#315469';
-  ctx.font = 'bold 28px Arial';
-  ctx.fillText('Economic Releases – Next Week', padding, padding + 30);
+  ctx.fillRect(padding, headerTop, width - padding * 2, headerHeight);
 
-  // Table headers
-  ctx.fillStyle = '#333';
-  ctx.font = 'bold 20px Arial';
-  ctx.fillText('Date', padding, padding + headerHeight);
-  ctx.fillText('Release', width / 3, padding + headerHeight);
+  // Header text
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 18px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const col1 = padding + (width - padding * 2) * 0.2;
+  const col2 = padding + (width - padding * 2) * 0.55;
+  const col3 = padding + (width - padding * 2) * 0.85;
+  ctx.fillText('Date', col1, headerTop + headerHeight / 2);
+  ctx.fillText('Indicator', col2, headerTop + headerHeight / 2);
+  ctx.fillText('Location', col3, headerTop + headerHeight / 2);
 
-  // Table rows
+  // Rows
   ctx.font = '16px Arial';
+  ctx.fillStyle = '#333';
   releases.forEach((r, idx) => {
+    const y = headerTop + headerHeight + idx * rowHeight;
+    ctx.strokeStyle = '#ddd';
+    ctx.strokeRect(padding, y, width - padding * 2, rowHeight);
+
     const date = new Date(r.DTSTART.replace(' ', 'T'));
-    const day = date.toLocaleDateString('en-IE', { weekday: 'short', month: 'short', day: 'numeric' });
-    ctx.fillText(day, padding, padding + headerHeight + (idx + 1) * rowHeight);
-    ctx.fillText(r.SUMMARY || 'Unnamed', width / 3, padding + headerHeight + (idx + 1) * rowHeight);
+    const dayStr = date.toLocaleDateString('en-IE', { weekday: 'short', month: 'short', day: 'numeric' });
+
+    ctx.fillText(dayStr, col1, y + rowHeight / 2);
+    ctx.fillText(r.SUMMARY || 'Unnamed', col2, y + rowHeight / 2);
+    ctx.fillText(r.LOCATION || 'Ireland', col3, y + rowHeight / 2);
   });
+
+  // Footer
+  ctx.font = '14px Arial';
+  ctx.fillStyle = '#888';
+  ctx.textAlign = 'center';
+  ctx.fillText('— mflanagan201@gmail.com', width / 2, totalHeight - padding);
 
   const buffer = canvas.toBuffer('image/png');
   const filePath = path.join('/tmp', 'releases.png');
