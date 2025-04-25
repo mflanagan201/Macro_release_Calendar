@@ -3,11 +3,16 @@ name: Tweet Release
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 14 * * *' # Runs every day at 14:00 UTC
+    - cron: '0 14 * * *' # Every day at 14:00 UTC
 
 jobs:
   tweet:
     runs-on: ubuntu-latest
+    env:   # <<<<<< ADD THIS
+      TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+      TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+      TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+      TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
 
     steps:
       - name: Checkout repository
