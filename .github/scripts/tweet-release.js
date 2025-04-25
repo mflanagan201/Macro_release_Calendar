@@ -1,7 +1,14 @@
 import fetch from 'node-fetch';
 import Papa from 'papaparse';
 import { TwitterApi } from 'twitter-api-v2';
+import { createCanvas } from 'canvas';
+import fs from 'fs/promises';
+import path from 'path';
+import dotenv from 'dotenv';
 
+dotenv.config();
+
+// Initialize Twitter client
 const client = new TwitterApi({
   appKey: process.env.TWITTER_API_KEY,
   appSecret: process.env.TWITTER_API_SECRET,
@@ -9,49 +16,93 @@ const client = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
+async function fetchReleases() {
+  const csvUrl = 'https://raw.githubusercontent.com/mflanagan201/gcal_auto/main/ECON_CAL.CSV';
+  const res = await fetch(csvUrl);
+  const csvText = await res.text();
+  const parsed = Papa.parse(csvText, { header: true }).data;
+
+  const now = new Date();
+  const nextWeek = new Date();
+  nextWeek.setDate(now.getDate() + 7);
+
+  return parsed.filter(r => {
+    const dateStr = r.DTSTART?.replace(' ', 'T');
+    if (!dateStr) return false;
+    const date = new Date(dateStr);
+    return date >= now && date <= nextWeek;
+  });
+}
+
+async function generateImage(releases) {
+  const width = 800;
+  const rowHeight = 40;
+  const padding = 20;
+  const headerHeight = 60;
+  const height = padding * 2 + headerHeight + rowHeight * releases.length;
+
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, width, height);
+
+  // Title
+  ctx.fillStyle = '#315469';
+  ctx.font = 'bold 28px Arial';
+  ctx.fillText('Economic Releases – Next Week', padding, padding + 30);
+
+  // Table headers
+  ctx.fillStyle = '#333';
+  ctx.font = 'bold 20px Arial';
+  ctx.fillText('Date', padding, padding + headerHeight);
+  ctx.fillText('Release', width / 3, padding + headerHeight);
+
+  // Table rows
+  ctx.font = '16px Arial';
+  releases.forEach((r, idx) => {
+    const date = new Date(r.DTSTART.replace(' ', 'T'));
+    const day = date.toLocaleDateString('en-IE', { weekday: 'short', month: 'short', day: 'numeric' });
+    ctx.fillText(day, padding, padding + headerHeight + (idx + 1) * rowHeight);
+    ctx.fillText(r.SUMMARY || 'Unnamed', width / 3, padding + headerHeight + (idx + 1) * rowHeight);
+  });
+
+  const buffer = canvas.toBuffer('image/png');
+  const filePath = path.join('/tmp', 'releases.png');
+  await fs.writeFile(filePath, buffer);
+  return filePath;
+}
+
 (async () => {
   try {
-    const csvUrl = 'https://raw.githubusercontent.com/mflanagan201/gcal_auto/main/ECON_CAL.CSV';
-    const res = await fetch(csvUrl);
-    const csvText = await res.text();
-    const parsed = Papa.parse(csvText, { header: true }).data;
-
-    console.log("CSV rows received:", parsed.length);
-    console.log("Sample row:", parsed[0]);
-
-    const now = new Date();
-    const nextWeek = new Date();
-    nextWeek.setDate(now.getDate() + 5);
-
-    const releases = parsed.filter(r => {
-      if (!r.DTSTART || !r.SUMMARY) return false;
-      const date = new Date(r.DTSTART.replace(' ', 'T'));
-      return date >= now && date <= nextWeek;
-    });
+    const releases = await fetchReleases();
 
     if (!releases.length) {
-      console.log('No Irish economic releases in the next 5 days.');
+      console.log('No releases found for next week.');
       return;
     }
 
-    const lines = releases.map(r => {
-      const date = new Date(r.DTSTART.replace(' ', 'T'));
-      const day = date.toLocaleDateString(undefined, { weekday: 'short' });
-      return `• ${day}: ${r.SUMMARY}`;
+    const imagePath = await generateImage(releases);
+
+    // Upload the image to Twitter
+    const mediaId = await client.v1.uploadMedia(imagePath);
+
+    // Compose the tweet text
+    const hashtags = "#Ireland #Economy #Macro";
+    const tweetText = `Upcoming Economic Releases for Ireland – see the full list below! ${hashtags}`;
+
+    // Send the tweet
+    await client.v2.tweet({
+      text: tweetText,
+      media: {
+        media_ids: [mediaId],
+      },
     });
 
-    const hashtags = '\n#Irisheconomy #ireland #economy #centralbank';
-    let body = "This Week's Irish Economic Releases:\n\n";
-    for (const line of lines) {
-      if ((body + line + '\n\nMore at macrocalendar.com' + hashtags).length > 280) break;
-      body += line + '\n\n';
-    }
-    body += 'More at macrocalendar.com' + hashtags;
-
-    const response = await client.v2.tweet(body);
-    console.log('Tweet sent successfully!', response);
+    console.log('Tweet with image sent successfully!');
   } catch (err) {
-    console.error('Tweet failed:', err.response?.data || err.message || err);
+    console.error('Tweet failed:', err.message);
     process.exit(1);
   }
 })();
