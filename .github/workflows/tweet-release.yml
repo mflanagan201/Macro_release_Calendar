@@ -1,25 +1,25 @@
-name: Tweet
+name: Tweet Macro Calendar
 
 on:
   schedule:
-    - cron: '0 9 * * 1' # Adjust to your timing (example: every Monday at 9 AM UTC)
-  workflow_dispatch:
+    - cron: '0 12 * * *'  # Adjust your timing if needed
+  workflow_dispatch:     # Allow manual runs
 
 jobs:
   tweet:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-    - name: Install dependencies
-      run: npm install  # <-- changed from `npm ci`
+      - name: Install dependencies
+        run: npm install
 
-    - name: Run script
-      run: npm start
+      - name: Run Twitter posting script
+        run: node scripts/postToTwitter.js
