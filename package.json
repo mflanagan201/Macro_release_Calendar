@@ -1,15 +1,17 @@
 {
   "name": "macrocalendar-bsky-poster",
   "version": "1.0.0",
-  "description": "Weekly Bluesky post for Irish economic releases",
+  "description": "Weekly Bluesky and Twitter post for Irish economic releases",
   "main": "scripts/postToBluesky.js",
   "type": "module",
   "scripts": {
     "start": "node scripts/postToBluesky.js"
   },
   "dependencies": {
-  "@atproto/api": "^0.4.0",
-  "node-fetch": "^2.6.7",
-  "papaparse": "^5.4.1"
-}
+    "@atproto/api": "^0.4.0",
+    "node-fetch": "^2.6.7",
+    "papaparse": "^5.4.1",
+    "twitter-api-v2": "^1.15.0",
+    "canvas": "^2.11.2"
+  }
 }
