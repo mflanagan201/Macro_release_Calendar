@@ -34,82 +34,97 @@ async function fetchReleases() {
   });
 }
 
-function drawRoundedRect(ctx, x, y, width, height, radius, color) {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
-  ctx.fillStyle = color;
-  ctx.fill();
+// Helper function for wrapping long text
+function wrapText(ctx, text, maxWidth) {
+  const words = text.split(' ');
+  let lines = [];
+  let currentLine = '';
+
+  words.forEach(word => {
+    const testLine = currentLine + word + ' ';
+    const { width } = ctx.measureText(testLine);
+    if (width > maxWidth && currentLine !== '') {
+      lines.push(currentLine.trim());
+      currentLine = word + ' ';
+    } else {
+      currentLine = testLine;
+    }
+  });
+
+  if (currentLine) {
+    lines.push(currentLine.trim());
+  }
+
+  return lines;
 }
 
 async function generateImage(releases) {
   const width = 800;
-  const rowHeight = 60;
   const padding = 20;
-  const headerHeight = 60;
-  const tableWidth = width - padding * 2;
-  const radius = 10;
-  const totalHeight = padding * 2 + headerHeight + rowHeight * releases.length;
+  const headerHeight = 50;
+  const rowHeight = 70;
+  const columnWidths = [160, 440, 160]; // Date | Indicator | Location
+  const height = padding * 2 + headerHeight + rowHeight * releases.length + 60; // extra space for link
 
-  const canvas = createCanvas(width, totalHeight);
+  const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
 
   // Background
   ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, width, totalHeight);
+  ctx.fillRect(0, 0, width, height);
 
-  const col1Width = tableWidth * 0.2; // Date
-  const col2Width = tableWidth * 0.6; // Indicator
-  const col3Width = tableWidth * 0.2; // Location
+  // Header background
+  ctx.fillStyle = '#315469';
+  ctx.fillRect(padding, padding, width - padding * 2, headerHeight);
 
-  const col1Center = padding + col1Width / 2;
-  const col2Center = padding + col1Width + col2Width / 2;
-  const col3Center = padding + col1Width + col2Width + col3Width / 2;
-
-  // Draw header with rounded corners
-  drawRoundedRect(ctx, padding, padding, tableWidth, headerHeight, radius, '#315469');
-
+  // Headers
   ctx.fillStyle = 'white';
-  ctx.font = 'bold 18px Arial';
+  ctx.font = 'bold 20px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  const headers = ['Date', 'Indicator', 'Location'];
+  let x = padding;
+  headers.forEach((header, idx) => {
+    ctx.fillText(header, x + columnWidths[idx] / 2, padding + headerHeight / 2);
+    x += columnWidths[idx];
+  });
 
-  ctx.fillText('Date', col1Center, padding + headerHeight / 2);
-  ctx.fillText('Indicator', col2Center, padding + headerHeight / 2);
-  ctx.fillText('Location', col3Center, padding + headerHeight / 2);
-
-  // Draw rows
+  // Rows
   ctx.font = '16px Arial';
   releases.forEach((r, idx) => {
-    const y = padding + headerHeight + idx * rowHeight;
+    const yStart = padding + headerHeight + idx * rowHeight;
 
-    // Alternate row background
-    ctx.fillStyle = idx % 2 === 0 ? 'white' : '#f9f9f9';
-    ctx.fillRect(padding, y, tableWidth, rowHeight);
-
-    ctx.strokeStyle = '#ddd';
-    ctx.strokeRect(padding, y, tableWidth, rowHeight);
-
-    const date = new Date(r.DTSTART.replace(' ', 'T'));
-    const dayStr = date.toLocaleDateString('en-IE', { weekday: 'short', month: 'short', day: 'numeric' });
+    // Row background
+    ctx.fillStyle = idx % 2 === 0 ? '#f9f9f9' : '#ffffff';
+    ctx.fillRect(padding, yStart, width - padding * 2, rowHeight);
 
     ctx.fillStyle = '#333';
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const textY = y + rowHeight / 2;
 
-    ctx.fillText(dayStr, col1Center, textY);
-    ctx.fillText(r.SUMMARY || 'Unnamed', col2Center, textY);
-    ctx.fillText(r.LOCATION || 'Ireland', col3Center, textY);
+    const date = new Date(r.DTSTART.replace(' ', 'T'));
+    const day = date.toLocaleDateString('en-IE', { weekday: 'short', month: 'short', day: 'numeric' });
+
+    ctx.fillText(day, padding + columnWidths[0] / 2, yStart + rowHeight / 2);
+
+    // Indicator text with wrapping
+    ctx.textAlign = 'left';
+    const indicatorX = padding + columnWidths[0] + 10;
+    const indicatorYStart = yStart + 20;
+    const indicatorLines = wrapText(ctx, r.SUMMARY || 'Unnamed', columnWidths[1] - 20);
+    indicatorLines.forEach((line, lineIdx) => {
+      ctx.fillText(line, indicatorX, indicatorYStart + lineIdx * 18);
+    });
+
+    // Location text
+    ctx.textAlign = 'center';
+    ctx.fillText(r.LOCATION || 'Ireland', padding + columnWidths[0] + columnWidths[1] + columnWidths[2] / 2, yStart + rowHeight / 2);
   });
+
+  // MacroCalendar.com link at the bottom
+  ctx.fillStyle = '#315469';
+  ctx.font = '16px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('See full calendar: www.macrocalendar.com', width / 2, height - 30);
 
   const buffer = canvas.toBuffer('image/png');
   const filePath = path.join('/tmp', 'releases.png');
@@ -133,7 +148,7 @@ async function generateImage(releases) {
 
     // Compose the tweet text
     const hashtags = "#IRE #economy #macro #nextweek #upcoming #eire";
-    const tweetText = `Upcoming Economic Releases for Ireland – see the full list at https://www.macrocalendar.com/ ${hashtags}`;
+    const tweetText = `Upcoming Economic Releases for Ireland! See more at www.macrocalendar.com ${hashtags}`;
 
     // Send the tweet
     await client.v2.tweet({
