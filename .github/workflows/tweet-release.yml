@@ -22,4 +22,4 @@ jobs:
         run: npm install
 
       - name: Run Twitter posting script
-        run: node scripts/postToTwitter.js
+        run: node .github/scripts/tweet-release.js
