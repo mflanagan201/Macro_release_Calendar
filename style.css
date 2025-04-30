@@ -9,14 +9,28 @@ body {
 header {
   background: #1e2a38;
   color: white;
-  padding: 1.5em;
+  padding: 2em 1em;
   text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2em;
+}
+
+header p {
+  margin: 0.5em 0 0;
+  font-size: 1.1em;
 }
 
 main {
   max-width: 800px;
-  margin: 2em auto;
+  margin: 3em auto;
   padding: 0 1em;
+}
+
+section {
+  margin-bottom: 3em;
 }
 
 ul#release-list {
@@ -27,10 +41,10 @@ ul#release-list {
 ul#release-list li {
   background: white;
   border-left: 4px solid #007bff;
-  margin-bottom: 1em;
-  padding: 1em;
+  margin-bottom: 1.5em;
+  padding: 1.2em;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  transition: 0.2s ease;
+  transition: background 0.2s ease;
 }
 
 ul#release-list li:hover {
@@ -40,21 +54,23 @@ ul#release-list li:hover {
 ul#release-list li strong {
   display: block;
   font-size: 1.1em;
-  margin-bottom: 0.3em;
+  margin-bottom: 0.4em;
   color: #1e2a38;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 footer {
   text-align: center;
   padding: 2em;
   background: #eee;
-}
-
-a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
+  font-size: 0.95em;
 }
