@@ -9,28 +9,14 @@ body {
 header {
   background: #1e2a38;
   color: white;
-  padding: 2em 1em;
+  padding: 1.5em;
   text-align: center;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 2em;
-}
-
-header p {
-  margin: 0.5em 0 0;
-  font-size: 1.1em;
 }
 
 main {
   max-width: 800px;
-  margin: 3em auto;
+  margin: 2em auto;
   padding: 0 1em;
-}
-
-section {
-  margin-bottom: 3em;
 }
 
 ul#release-list {
@@ -42,9 +28,9 @@ ul#release-list li {
   background: white;
   border-left: 4px solid #007bff;
   margin-bottom: 1.5em;
-  padding: 1.2em;
+  padding: 1em;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  transition: background 0.2s ease;
+  transition: 0.2s ease;
 }
 
 ul#release-list li:hover {
@@ -54,23 +40,39 @@ ul#release-list li:hover {
 ul#release-list li strong {
   display: block;
   font-size: 1.1em;
-  margin-bottom: 0.4em;
+  margin-bottom: 0.3em;
   color: #1e2a38;
-}
-
-a {
-  color: #007bff;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-a:hover {
-  text-decoration: underline;
 }
 
 footer {
   text-align: center;
   padding: 2em;
   background: #eee;
-  font-size: 0.95em;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.calendar-link {
+  display: inline-block;
+  margin: 2em auto 0 auto;
+  padding: 0.75em 1.5em;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  border-radius: 4px;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background-color 0.2s;
+}
+
+.calendar-link:hover {
+  background-color: #0056b3;
 }
