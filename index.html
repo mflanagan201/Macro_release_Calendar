@@ -23,7 +23,6 @@
   <meta property="og:description" content="Get notified about upcoming key Irish economic indicators. See what’s coming this week!" />
   <meta property="og:url" content="https://www.macrocalendar.com" />
   <meta property="og:type" content="website" />
-  <!-- <meta property="og:image" content="https://macrocalendar.com/logo.png" /> -->
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -32,6 +31,35 @@
 
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <style>
+    section.blog {
+      background: #fff;
+      padding: 1.5em;
+      margin-top: 3em;
+      border-left: 4px solid #007bff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    section.blog ul {
+      padding-left: 1.2em;
+    }
+
+    section.blog a {
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    section.blog a:hover {
+      text-decoration: underline;
+    }
+
+    section#signup-form-section {
+      background: #fff;
+      padding: 1.5em;
+      margin-top: 3em;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -44,14 +72,14 @@
       <ul id="release-list">Loading data...</ul>
     </section>
 
-    <section style="margin-top: 3em;">
+    <section class="blog">
       <h2>From the Blog</h2>
       <ul>
         <li><a href="blog/integrate-calendar-outlook.html">How to integrate an Internet Calendar into Outlook</a></li>
       </ul>
     </section>
 
-    <section style="margin-top: 3em;">
+    <section id="signup-form-section">
       <h2>Stay Informed</h2>
       <p>Subscribe to receive weekly updates of key economic releases.</p>
       <form id="signup-form">
@@ -63,7 +91,7 @@
     </section>
   </main>
 
-  <footer style="margin-top: 4em;">
+  <footer>
     <a href="calendar.html">View full calendar</a>
   </footer>
 
