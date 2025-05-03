@@ -2,7 +2,7 @@ name: Send Weekly Email
 
 on:
   schedule:
-    - cron: '0 8 * * 1' # Every Monday at 8:00 UTC
+    - cron: '0 9 * * 5'
   workflow_dispatch:
 
 jobs:
