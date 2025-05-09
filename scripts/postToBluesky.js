@@ -22,7 +22,7 @@ const agent = new BskyAgent({ service: 'https://bsky.social' });
 
     const now = new Date();
     const nextWeek = new Date();
-    nextWeek.setDate(now.getDate() + 7);
+    nextWeek.setDate(now.getDate() + 8);
 
     const releases = parsed.filter(r => {
       if (!r.DTSTART || !r.SUMMARY) return false;
