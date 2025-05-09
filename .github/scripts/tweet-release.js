@@ -22,11 +22,11 @@ async function fetchReleases() {
   const csvText = await res.text();
   const parsed = Papa.parse(csvText, { header: true }).data;
 
-  const now = new Date();
+  const now = new Date()+1;
   const nextWeek = new Date();
   nextWeek.setDate(now.getDate() + 8);
 
-  return parsed.filter(r > {
+  return parsed.filter(r >= {
     const dateStr = r.DTSTART?.replace(' ', 'T');
     if (!dateStr) return false;
     const date = new Date(dateStr);
