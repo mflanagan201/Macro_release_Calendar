@@ -22,7 +22,7 @@ const agent = new BskyAgent({ service: 'https://bsky.social' });
 
     const now = new Date();
     const nextWeek = new Date();
-    nextWeek.setDate(now.getDate() + 5);
+    nextWeek.setDate(now.getDate() + 7);
 
     const releases = parsed.filter(r => {
       if (!r.DTSTART || !r.SUMMARY) return false;
@@ -41,14 +41,14 @@ const agent = new BskyAgent({ service: 'https://bsky.social' });
       return `• ${day}: ${r.SUMMARY}`;
     });
 
-    let body = "This Week's Irish Economic Releases:\n\n";
+    let body = "Next Week's Irish Economic Releases:\n\n";
     for (const line of lines) {
       const nextLine = line + '\n\n';
-      if ((body + nextLine + 'More: https://www.macrocalendar.com\n\n#Irisheconomy #ireland #economy #centralbank').length > 300) break;
+      if ((body + nextLine + 'More: https://www.macrocalendar.com\n\n #Irisheconomy   #ireland \n#economy #forecast #IRE').length > 300) break;
       body += nextLine;
     }
     body += 'More: https://www.macrocalendar.com\n\n';
-    body += '#Irisheconomy #ireland #economy #centralbank';
+    body += '#Irisheconomy #ireland #economy #forecast #IRE';
 
     // Use RichText to automatically detect and apply facets for links and hashtags
     const rt = new RichText({ text: body });
