@@ -21,9 +21,9 @@ async function fetchReleases() {
 
   const now = new Date();
   const nextWeek = new Date();
-  nextWeek.setDate(now.getDate() + 7);
+  nextWeek.setDate(now.getDate() + 8);
 
-  return parsed.filter(r => {
+  return parsed.filter(r > {
     const dateStr = r.DTSTART?.replace(' ', 'T');
     if (!dateStr) return false;
     const date = new Date(dateStr);
@@ -70,7 +70,7 @@ async function generateImage(releases) {
   return filePath;
 }
 
-(async () => {
+(async () > {
   try {
     const releases = await fetchReleases();
 
