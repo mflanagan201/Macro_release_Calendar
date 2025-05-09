@@ -24,9 +24,9 @@ async function fetchReleases() {
 
   const now = new Date();
   const nextWeek = new Date();
-  nextWeek.setDate(now.getDate() + 7);
+  nextWeek.setDate(now.getDate() + 8);
 
-  return parsed.filter(r => {
+  return parsed.filter(r > {
     const dateStr = r.DTSTART?.replace(' ', 'T');
     if (!dateStr) return false;
     const date = new Date(dateStr);
@@ -40,7 +40,7 @@ function wrapText(ctx, text, maxWidth) {
   let lines = [];
   let currentLine = '';
 
-  words.forEach(word => {
+  words.forEach(word > {
     const testLine = currentLine + word + ' ';
     const { width } = ctx.measureText(testLine);
     if (width > maxWidth && currentLine !== '') {
