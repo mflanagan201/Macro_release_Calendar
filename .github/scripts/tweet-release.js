@@ -24,7 +24,7 @@ async function fetchReleases() {
 
   const now = new Date()+1;
   const nextWeek = new Date();
-  nextWeek.setDate(now.getDate() + 8);
+  nextWeek.setDate(now.getDate() + 7);
 
   return parsed.filter(r >= {
     const dateStr = r.DTSTART?.replace(' ', 'T');
