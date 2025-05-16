@@ -30,7 +30,7 @@ async function fetchReleases() {
     const dateStr = r.DTSTART?.replace(' ', 'T');
     if (!dateStr) return false;
     const date = new Date(dateStr);
-    return date >= now && date <= nextWeek;
+    return date > now && date <= nextWeek;
   });
 }
 
