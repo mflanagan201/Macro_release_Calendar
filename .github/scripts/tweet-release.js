@@ -23,14 +23,19 @@ async function fetchReleases() {
   const parsed = Papa.parse(csvText, { header: true }).data;
 
   const now = new Date();
-  const nextWeek = new Date();
+
+  // Exclude today's releases by setting a cutoff at end of today
+  const endOfToday = new Date(now);
+  endOfToday.setHours(23, 59, 59, 999);
+
+  const nextWeek = new Date(now);
   nextWeek.setDate(now.getDate() + 8);
 
   return parsed.filter(r => {
     const dateStr = r.DTSTART?.replace(' ', 'T');
     if (!dateStr) return false;
     const date = new Date(dateStr);
-    return date > now && date <= nextWeek;
+    return date > endOfToday && date <= nextWeek;
   });
 }
 
