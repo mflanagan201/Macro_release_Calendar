@@ -21,6 +21,9 @@ const agent = new BskyAgent({ service: 'https://bsky.social' });
     console.log("Sample row:", parsed[0]);
 
     const now = new Date();
+    const endOfToday = new Date(now);
+    endOfToday.setHours(23, 59, 59, 999);
+
     const nextWeek = new Date();
     nextWeek.setDate(now.getDate() + 8);
 
