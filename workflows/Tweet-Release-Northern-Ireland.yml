@@ -1,4 +1,4 @@
-name: Tweet Release
+name: Tweet Release Northern Ireland 
 
 on:
   workflow_dispatch:
@@ -29,5 +29,5 @@ jobs:
       - name: Install dotenv manually
         run: npm install dotenv
 
-      - name: Run the tweet release script
+      - name: Run the tweet release NI script
         run: node .github/scripts/tweet_NI.js
