@@ -45,7 +45,7 @@ async function generateImage(releases) {
   ctx.fillRect(0, 0, width, height);
 
   // Title
-  ctx.fillStyle = '#315469';
+  ctx.fillStyle = '#596931';
   ctx.font = 'bold 28px Arial';
   ctx.fillText('Economic Releases – Next Week', padding, padding + 30);
 
