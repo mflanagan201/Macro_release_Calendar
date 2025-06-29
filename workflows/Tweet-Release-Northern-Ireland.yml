@@ -3,7 +3,7 @@ name: Tweet Release
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 11 * * 5'
+    - cron: '26 11 * * 6'
 
 jobs:
   tweet:
