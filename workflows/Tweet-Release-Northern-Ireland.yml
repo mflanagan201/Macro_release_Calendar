@@ -30,4 +30,4 @@ jobs:
         run: npm install dotenv
 
       - name: Run the tweet release script
-        run: node .github/scripts/tweet-release_NI.js
+        run: node .github/scripts/twitter_NI.js
