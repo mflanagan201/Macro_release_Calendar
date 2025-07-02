@@ -1,4 +1,4 @@
-name: Tweet Release
+name: Tweet Release NI
 
 on:
   workflow_dispatch:
