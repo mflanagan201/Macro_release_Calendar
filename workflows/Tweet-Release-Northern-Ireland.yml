@@ -1,9 +1,9 @@
-name: Tweet Release Northern Ireland 
+name: Tweet Release
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '00 19 * * 7'
+    - cron: '0 9 * * 4'
 
 jobs:
   tweet:
@@ -29,5 +29,5 @@ jobs:
       - name: Install dotenv manually
         run: npm install dotenv
 
-      - name: Run the tweet release NI script
-        run: node .github/scripts/tweet_NI.js
+      - name: Run the tweet release script
+        run: node .github/scripts/tweet-release_NI.js
